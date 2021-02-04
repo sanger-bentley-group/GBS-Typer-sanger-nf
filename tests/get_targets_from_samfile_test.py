@@ -5,10 +5,11 @@ from unittest.mock import patch, call
 from bin.get_targets_from_samfile import get_targets, in_line, write_sam_file, write_target_sam_files, get_arguments
 
 
+
 class TestProcessResults(unittest.TestCase):
 
-    TEST_TARGETS = 'test_data/seqs_of_interest.txt'
-    TEST_SAM = 'test_data/get_targets_test.sam'
+    TEST_TARGETS = 'test_data/input/seqs_of_interest.txt'
+    TEST_SAM = 'test_data/input/get_targets_test.sam'
 
     def test_get_targets(self):
         actual = get_targets(self.TEST_TARGETS)
@@ -48,8 +49,8 @@ class TestProcessResults(unittest.TestCase):
         self.assertFalse(in_line(line, target))
 
     def test_write_sam_file(self):
-        write_sam_file(self.TEST_SAM, '12__23S3__23S3-3__12', '26189_8#5', 'test_data/CHECK_')
-        f = open('test_data/CHECK_12__23S3__23S3-3__12_26189_8#5_seq.sam', "r")
+        write_sam_file(self.TEST_SAM, '12__23S3__23S3-3__12', '26189_8#5', 'test_data/output/CHECK_')
+        f = open('test_data/output/CHECK_12__23S3__23S3-3__12_26189_8#5_seq.sam', "r")
         actual = "".join(f.readlines())
         self.assertEqual(actual, """@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:12__23S3__23S3-3__12\tLN:60\n@PG\tID:bowtie2\nHX4_26077:6:2110:21704:24005\t153\t12__23S3__23S3-3__12\t1\n""")
 
@@ -64,16 +65,16 @@ class TestProcessResults(unittest.TestCase):
             '17__RPOBgbs__RPOBgbs-2__17',
             '18__RPOBgbs__RPOBgbs-3__18',
             '19__RPOBgbs__RPOBgbs-4__19']
-        write_target_sam_files(targets, self.TEST_SAM, '26189_8#5', 'test_data/CHECK_')
+        write_target_sam_files(targets, self.TEST_SAM, '26189_8#5', 'test_data/output/CHECK_')
         mock_write_sam_file.assert_has_calls([
-            call(self.TEST_SAM, '7__PARCGBS__PARCGBS-1__7', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '5__GYRAGBS__GYRAGBS-1__5', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '11__23S1__23S1-1__11', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '12__23S3__23S3-3__12', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '16__RPOBgbs__RPOBgbs-1__16', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '17__RPOBgbs__RPOBgbs-2__17', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '18__RPOBgbs__RPOBgbs-3__18', '26189_8#5', 'test_data/CHECK_'),
-            call(self.TEST_SAM, '19__RPOBgbs__RPOBgbs-4__19', '26189_8#5', 'test_data/CHECK_')
+            call(self.TEST_SAM, '7__PARCGBS__PARCGBS-1__7', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '5__GYRAGBS__GYRAGBS-1__5', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '11__23S1__23S1-1__11', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '12__23S3__23S3-3__12', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '16__RPOBgbs__RPOBgbs-1__16', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '17__RPOBgbs__RPOBgbs-2__17', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '18__RPOBgbs__RPOBgbs-3__18', '26189_8#5', 'test_data/output/CHECK_'),
+            call(self.TEST_SAM, '19__RPOBgbs__RPOBgbs-4__19', '26189_8#5', 'test_data/output/CHECK_')
             ], any_order = False)
 
     def test_arguments(self):

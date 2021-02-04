@@ -1,0 +1,2 @@
+ID	ALP1	ALP23	ALPHA	HVGA	PI1	PI2A1	PI2A2	PI2B	RIB	SRR1	SRR2
+test	-	+	-	-	+	+	-	-	-	+	-

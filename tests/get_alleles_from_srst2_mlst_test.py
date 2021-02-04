@@ -3,9 +3,9 @@ import unittest
 
 from bin.get_alleles_from_srst2_mlst import get_mismatch_and_depth, get_alleles_from_mismatches, write_alleles_file, get_arguments
 class TestProcessResults(unittest.TestCase):
-    TEST_FILE = 'test_data/test__mlst__Streptococcus_agalactiae_MLST_alleles__results.txt'
-    TEST_OUT1 = 'test_data/test_mlst_alleles.txt'
-    TEST_OUT2 = 'test_data/test_mlst_alleles2.txt'
+    TEST_FILE = 'test_data/input/test__mlst__Streptococcus_agalactiae_MLST_alleles__results.txt'
+    TEST_OUT1 = 'test_data/output/test_mlst_alleles.txt'
+    TEST_OUT2 = 'test_data/output/test_mlst_alleles2.txt'
 
     def test_get_mismatch_and_depth(self):
         actual = get_mismatch_and_depth(self.TEST_FILE)

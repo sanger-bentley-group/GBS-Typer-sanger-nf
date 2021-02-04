@@ -1,2 +1,0 @@
-Matched_Allele	Match_Type	Serotype	AvgDepth
-III-1	III=imperfect	III	267.595

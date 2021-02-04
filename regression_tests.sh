@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-in_dir=test_data/input_data
-out_dir=test_data/output_data
+in_dir=regression_test_data/input_data
+out_dir=regression_test_data/output_data
 
 SUDO_OPT=
 while getopts ":s" opt; do
@@ -18,7 +18,7 @@ echo "Starting regression tests..."
 echo ""
 
 # Run pipeline on test input data
-${SUDO_OPT}nextflow -log nextflow_test.log run main.nf --reads "$in_dir/test_{1,2}.fastq.gz" --results_dir "$out_dir" --run_surfacetyper --output 'test'
+${SUDO_OPT}nextflow -log nextflow_test.log run main.nf --reads "$in_dir/test_{1,2}.fastq.gz" --results_dir "$out_dir" --run_surfacetyper --run_pbptyper --contigs "$in_dir/test.fa" --output 'test'
 cat nextflow_test.log
 echo ""
 
@@ -68,6 +68,11 @@ error_status=$(($error_status | $out))
 
 # Check for test_surface_protein_variants.txt output
 file_diff "${out_dir}/test_surface_protein_variants.txt" "${out_dir}/reference_surface_protein_variants.txt"
+out=$?
+error_status=$(($error_status | $out))
+
+# Check for test_existing_pbp_alleles.txt output
+file_diff "${out_dir}/test_existing_pbp_alleles.txt" "${out_dir}/reference_existing_pbp_alleles.txt"
 out=$?
 error_status=$(($error_status | $out))
 

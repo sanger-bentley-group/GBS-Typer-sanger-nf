@@ -1,6 +1,6 @@
 import unittest
 import os
-from bin.file_utils import FileUtils
+from lib.file_utils import FileUtils
 
 
 class TestFileUtils(unittest.TestCase):

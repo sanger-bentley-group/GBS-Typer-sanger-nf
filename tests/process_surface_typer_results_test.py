@@ -8,7 +8,7 @@ from bin.process_surface_typer_results import get_arguments, run,  \
 class TestProcessSurfaceTyperResults(unittest.TestCase):
     TEST_LANE = "26189_8#338"
     TEST_GBS_FULLGENES_RESULTS_FILE = \
-        "test_data/" + TEST_LANE + "_SURFACE__fullgenes__GBS_Surface_Gene-DB_Final__results.txt"
+        "test_data/input/" + TEST_LANE + "_SURFACE__fullgenes__GBS_Surface_Gene-DB_Final__results.txt"
 
     MIN_DEPTH = 30
 
@@ -176,8 +176,8 @@ class TestProcessSurfaceTyperResults(unittest.TestCase):
                              fullgenes_file_id='srst2_output_name', db='sero_db', output='outfile', min_depth=30.0))
 
     @patch('bin.process_surface_typer_results.derive_presence_absence')
-    @patch('bin.file_utils.FileUtils.create_output_contents')
-    @patch('bin.file_utils.FileUtils.write_output')
+    @patch('lib.file_utils.FileUtils.create_output_contents')
+    @patch('lib.file_utils.FileUtils.write_output')
     def test_run(self, mock_write_output, mock_create_output_contents, mock_derive_presence_absence):
 
         # Given
@@ -202,4 +202,3 @@ class TestProcessSurfaceTyperResults(unittest.TestCase):
             call(ANY, args.output + '_surface_protein_variants_sample.txt'),
             call(ANY, args.output + '_surface_protein_incidence_sample.txt')
         ], any_order=False)
-

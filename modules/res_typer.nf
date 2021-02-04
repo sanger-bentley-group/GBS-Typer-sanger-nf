@@ -10,6 +10,6 @@ process res_typer {
 
     """
     process_res_typer_results.py --srst2_gbs_fullgenes ${res_dir}/${pair_id}/${pair_id}_GBS_RES_*__fullgenes__*__results.txt --srst2_gbs_consensus ${res_dir}/${pair_id}/${pair_id}_consensus_seq.fna --srst2_other_fullgenes ${res_dir}/${pair_id}/${pair_id}_OTHER_RES_*__fullgenes__*__results.txt --min_read_depth ${min_read_depth} --output_prefix ${pair_id}
-    rm ${res_dir}/${pair_id}/${pair_id}*
+    rm -f ${res_dir}/${pair_id}/${pair_id}*
     """
 }

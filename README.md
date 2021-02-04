@@ -114,34 +114,36 @@ This will produce combined tables of output_file_prefix_serotype_res_incidence.t
 
 ## Additional options
 ### Inputs
-    --db_version                Database version. (Default: 0.1.1)
-    --other_res_dbs             Paths to other resistance reference database(s). Must be FASTA format. Specify 'none' to omit using other resistance databases. (Default: 'db/0.1.1/ARGannot-DB/ARG-ANNOT.fasta' from ARGannot_r3 of the SRST2 software, which includes non-redundant ResFinder and CARD database genes).
+    --contigs                       Path of file containing FASTA contigs. Only use when --run_pbptyper is specified. (Use wildcard '*' to specify multiple files, e.g. 'data/*.fa')
+    --db_version                    Database version. (Default: 0.1.2)
+    --other_res_dbs                 Paths to other resistance reference database(s). Must be FASTA format. Specify 'none' to omit using other resistance databases. (Default: 'db/0.1.1/ARGannot-DB/ARG-ANNOT.fasta' from ARGannot_r3 of the SRST2 software, which includes non-redundant ResFinder and CARD database genes).
 
 ### Outputs
-    --results_dir               Results directory for output files. (Default: './results')
-    --tmp_dir                   Temporary directory for intermediate files. (Default: './tmp')
+    --results_dir                   Results directory for output files. (Default: './results')
+    --tmp_dir                       Temporary directory for intermediate files. (Default: './tmp')
 
 ### Parameters
-    --gbs_res_min_coverage      Minimum coverage for mapping to the GBS resistance database. (Default: 99.9)
-    --gbs_res_max_divergence    Maximum divergence for mapping to the GBS resistance database. (Default: 5, i.e. report only hits with <5% divergence)
-    --other_res_min_coverage    Minimum coverage for mapping to other resistance reference database(s). Number of values must equal the number of resistance reference database files and must correspond to the order specified in --other_res_dbs. (Default: 70)
-    --other_res_max_divergence  Maximum divergence for mapping to other resistance reference database(s). Number of values must equal the number of resistance reference database files and must correspond to the order specified in --other_res_dbs. (Default: 30, i.e. report only hits with <30% divergence)
-    --restyper_min_read_depth   Minimum read depth where mappings to antibiotic resistance genes with fewer reads are excluded. (Default: 30)
-    --serotyper_min_read_depth  Minimum read depth where mappings to serotyping genes with fewer reads are excluded. (Default: 30)
+    --gbs_res_min_coverage          Minimum coverage for mapping to the GBS resistance database. (Default: 99.9)
+    --gbs_res_max_divergence        Maximum divergence for mapping to the GBS resistance database. (Default: 5, i.e. report only hits with <5% divergence)
+    --other_res_min_coverage        Minimum coverage for mapping to other resistance reference database(s). Number of values must equal the number of resistance reference database files and must correspond to the order specified in --other_res_dbs. (Default: 70)
+    --other_res_max_divergence      Maximum divergence for mapping to other resistance reference database(s). Number of values must equal the number of resistance reference database files and must correspond to the order specified in --other_res_dbs. (Default: 30, i.e. report only hits with <30% divergence)
+    --restyper_min_read_depth       Minimum read depth where mappings to antibiotic resistance genes with fewer reads are excluded. (Default: 30)
+    --serotyper_min_read_depth      Minimum read depth where mappings to serotyping genes with fewer reads are excluded. (Default: 30)
 
 ### Other Pipeline Options
-    --run_sero_res              Run the main serotyping and resistance pipelines. (Default: true)
-                                Use '--run_sero_res false' to override the default.
-    --run_mlst                  Run the MLST pipeline to query new MLST alleles. (Default: false)
-    --run_surfacetyper          Run the surface protein typing pipeline. (Default: false)
-
+    --run_sero_res                  Run the main serotyping and resistance pipelines. (Default: true)
+                                    Use '--run_sero_res false' to override the default.
+    --run_mlst                      Run the MLST pipeline to query new MLST alleles. (Default: false)
+    --run_pbptyper                  Run the PBP (Penicillin binding protein) allele typer pipeline. Must also specify --contigs input. (Default: false)
+    --run_surfacetyper              Run the surface protein typing pipeline. (Default: false)
 
 ### Other Pipeline Parameters
-    --mlst_min_read_depth          Minimum read depth where mappings to alleles in MLST with fewer reads are excluded. Only operational with --run_mlst. (Default: 30)
-    --surfacetyper_min_coverage    Minimum coverage for mapping to the GBS surface protein database.(Default: 70)
-    --surfacetyper_max_divergence  Maximum divergence for mapping to the GBS surface protein database. (Default: 8,
-                                   i.e. report only hits with <8% divergence))
-    --surfacetyper_min_read_depth  Minimum read depth for surface protein typing pipeline (Default: 30)
+    --mlst_min_read_depth           Minimum read depth where mappings to alleles in MLST with fewer reads are excluded. Only operational with --run_mlst. (Default: 30)
+    --pbp_frac_align_threshold      Minimum fraction of sequence alignment length of PBP gene. Only operational with --run_pbptyper. (Default: 0.5)
+    --pbp_frac_identity_threshold   Minimum fraction of alignment identity between PBP genes and assemblies. Only operational with --run_pbptyper. (Default: 0.5)
+    --surfacetyper_min_coverage     Minimum coverage for mapping to the GBS surface protein database. Only operational with --run_surfacetyper. (Default: 70)
+    --surfacetyper_max_divergence   Maximum divergence for mapping to the GBS surface protein database. Only operational with --run_surfacetyper. (Default: 8, i.e. report only hits with <8% divergence)
+    --surfacetyper_min_read_depth   Minimum read depth for surface protein typing pipeline. Only operational with --run_surfacetyper. (Default: 30)
 
 All default options can be changed by editing the ```nextflow.config``` file.
 
@@ -152,7 +154,6 @@ To include MLST pipeline to query new MLST alleles
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --new_mlst
 ```
 
-### Output
 This will produce a text file including sequences and pileups for each allele with sufficient read depth greater than or equal to the --mlst_min_read_depth for each sample called <sampleID>_new_mlst_alleles.txt in the 'results' directory.
 
     New MLST Allele Consensus:
@@ -176,7 +177,6 @@ To enable the surface typing pipeline provide the **--run_surfacetyper** command
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_surfacetyper
 ```
 
-### Output
 This will create two tab-delimited files in the 'results' directory
 1. **<output_file_prefix>_surface_protein_incidence.txt**
 This shows the incidence of different surface protein alleles in the Strep B sample(s), e.g.
@@ -192,20 +192,59 @@ ID | ALPH | HVGA | PILI | SRR
 :---: | :---: | :---: | :---: | :---:
 26189_8#338 | ALP23 | neg | PI1:PI2A1 | SRR1
 
+### PBP (Penicillin-binding protein) Typing Pipeline Usage
+To enable the PBP typing pipeline provide the **--run_pbptyper** command line argument and specify the contig FASTA files using and **--contigs**:
+```
+nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_pbptyper --contigs 'data/*.fa'
+```
+
+If existing PBP alleles are found, a tab-delimited file is created in the 'results' directory. The file contains the sample IDs (that are determined from the contig FASTA file names e.g. 25292_2#85 from data/25292_2#85.fa), the contig identifiers with start, end and forward(+)/reverse(-) positions, and the PBP allele identifier.
+
+ID | Contig | PBP_allele
+:---: | :---: | :---:
+25292_2#85 | .25292_2_85.9:39495-40455(+) | 2\|\|GBS_1A
+26077_6#118 | .26077_6_118.11:39458-40418(+) | 1\|\|GBS_1A
+
+If a new PBP allele is found in a sample, a FASTA file of amino acids is created in the 'results' directory. For example, if contig .25292_2_85.9 from sample 25292_2#85 contained a new PBP-1A allele, then .25292_2_85.9_GBS1A-1_PBP_new_allele.faa is generated with contents:
+
+    >.26077_6_118.11:39458-40418(+)
+    DIYNSDTYIAYPNNELQIASTIMDATNGKVIAQLGGRHQNENISFGTNQSVLTDRDWGST
+    MKPISAYAPAIDSGVYNSTGQSLNDSVYYWPGTSTQLYDWDRQYMGWMSMQTAIQQSRNV
+    PAVRALEAAGLDEAKSFLEKLGIYYPEMNYSNAISSNNSSSDAKYGASSEKMAAAYSAFA
+    NGGTYYKPQYVNKIEFSDGTNDTYAASGSRAMKETTAYMMTDMLKTVLTFGTGTKAAIPG
+    VAQAGKTGTSNYTEDELAKIEATTGIYNSAVGTMAPDENFVGYTSKYTMAIWTGYKNRLT
+    PLYGSQLDIATEVYRAMMSY
+
+
 ### Examples
 It is recommended you use the default parameters for specifying other resistance databases. However, to use different or multiple resistance databases with the GBS-specific resistance database, e.g. ARG-ANNOT and ResFinder in the db/0.0.2 directory, both with a minimum coverage of 70 and maximum divergence of 30:
 ```
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --other_res_dbs 'db/0.0.2/ARGannot-DB/ARG-ANNOT.fasta db/0.0.2/ResFinder-DB/ResFinder.fasta' --other_res_min_coverage '70 70' --other_res_max_divergence '30 30'
 ```
-To run **only** the surface protein typing pipeline, use: 
+To run **only** the surface protein typing pipeline, use:
 ```
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_sero_res false --run_surfacetyper
 ```
-To run **only** the MLST pipeline, use: 
+To run **only** the MLST pipeline, use:
 ```
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_sero_res false --run_mlst
 ```
 The default configuration will run serotyping and resistance typing only.
+
+The default configuration will run serotyping and resistance typing only.
+To run **only** the surface protein typing pipeline, use:
+```
+nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_sero_res false --run_surfacetyper
+```
+To run **only** the MLST pipeline, use:
+```
+nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_sero_res false --run_mlst
+```
+To run **only** the PBP typing pipeline, use:
+```
+nextflow run main.nf --output 'output_file_prefix' --run_sero_res false --run_pbptyper --contigs 'data/*.fa'
+```
+The **--reads** parameter is not needed for the PBP typing pipeline.
 
 ## Dependencies
 All pipeline dependencies are built into the [docker hub dependencies image](https://hub.docker.com/repository/docker/sangerpathogens/gbs-typer-sanger-nf), used by the pipeline.

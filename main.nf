@@ -13,7 +13,8 @@ include {srst2_for_res_typing; split_target_RES_seq_from_sam_file; split_target_
 include {res_typer} from './modules/res_typer.nf'
 include {surface_typer} from './modules/surface_typer.nf'
 include {srst2_for_mlst; get_mlst_allele_and_pileup} from './modules/mlst.nf'
-include {combine_results; finalise_surface_typer_results} from './modules/combine.nf'
+include {get_pbp_genes; get_pbp_alleles} from './modules/pbp_typer.nf'
+include {combine_results; finalise_surface_typer_results; finalise_pbp_existing_allele_results} from './modules/combine.nf'
 
 
 // Help message
@@ -23,10 +24,15 @@ if (params.help){
 }
 
 // Check if reads specified
-if (params.reads == ""){
-    println("Please specify reads with --reads.")
-    println("Print help with --help")
-    System.exit(1)
+if (params.run_sero_res | params.run_mlst | params.run_surfacetyper){
+    if (params.reads == ""){
+        println("Please specify reads with --reads.")
+        println("Print help with --help")
+        System.exit(1)
+    }
+    // Create read pairs channel
+    Channel.fromFilePairs( params.reads, checkIfExists: true )
+        .set { read_pairs_ch }
 }
 
 // Check if output specified
@@ -36,7 +42,7 @@ if (params.output == ""){
     System.exit(1)
 }
 
-if (!params.run_sero_res && !params.run_surfacetyper && !params.run_mlst){
+if (!params.run_sero_res && !params.run_surfacetyper && !params.run_mlst && !params.run_pbptyper){
     println("Please specify one or more pipelines to run.")
     println("Print help with --help")
     System.exit(1)
@@ -130,13 +136,15 @@ if (params.surfacetyper_min_read_depth < 0){
 tmp_dir = file(params.tmp_dir)
 tmp_dir.mkdir()
 
-// Results directory
+// Create results directory if it doesn't already exist
 results_dir = file(params.results_dir)
+results_dir.mkdir()
 
 // Output files
 params.sero_res_incidence_out = "${params.output}_serotype_res_incidence.txt"
 params.variants_out =  "${params.output}_gbs_res_variants.txt"
 params.alleles_variants_out = "${params.output}_drug_cat_alleles_variants.txt"
+params.existing_pbp_alleles_out = "${params.output}_existing_pbp_alleles.txt"
 params.surface_protein_incidence_out = "${params.output}_surface_protein_incidence.txt"
 params.surface_protein_variants_out = "${params.output}_surface_protein_variants.txt"
 
@@ -203,6 +211,74 @@ workflow MLST {
         get_mlst_allele_and_pileup.out
 }
 
+// PBP-1A allele typing pipeline
+workflow PBP1A {
+
+    take:
+        pbp_typer_output
+
+    main:
+        // Run
+        get_pbp_alleles(pbp_typer_output, 'GBS1A-1', file(params.gbs_blactam_1A_db, checkIfExists: true))
+
+        // Output new PBP alleles to results directory
+        get_pbp_alleles.out.new_pbp.subscribe { it ->
+            it.copyTo(file("${results_dir}"))
+        }
+
+        // Combine existing PBP alleles results in one file
+        finalise_pbp_existing_allele_results(get_pbp_alleles.out.existing_pbp)
+
+    emit:
+        // Emit existing PBP alleles for collection
+        finalise_pbp_existing_allele_results.out
+}
+
+// PBP-2B allele typing pipeline
+workflow PBP2B {
+
+    take:
+        pbp_typer_output
+
+    main:
+        // Run
+        get_pbp_alleles(pbp_typer_output, 'GBS2B-1', file(params.gbs_blactam_2B_db, checkIfExists: true))
+
+        // Output new PBP alleles to results directory
+        get_pbp_alleles.out.new_pbp.subscribe { it ->
+            it.copyTo(file("${results_dir}"))
+        }
+
+        // Combine existing PBP alleles results in one file
+        finalise_pbp_existing_allele_results(get_pbp_alleles.out.existing_pbp)
+
+    emit:
+        // Emit existing PBP alleles for collection
+        finalise_pbp_existing_allele_results.out
+}
+
+// PBP-2X allele typing pipeline
+workflow PBP2X {
+
+    take:
+        pbp_typer_output
+
+    main:
+        // Run
+        get_pbp_alleles(pbp_typer_output, 'GBS2X-1', file(params.gbs_blactam_2X_db, checkIfExists: true))
+
+        // Output new PBP alleles to results directory
+        get_pbp_alleles.out.new_pbp.subscribe { it ->
+            it.copyTo(file("${results_dir}"))
+        }
+
+        // Combine existing PBP alleles results in one file
+        finalise_pbp_existing_allele_results(get_pbp_alleles.out.existing_pbp)
+
+    emit:
+        // Emit existing PBP alleles for collection
+        finalise_pbp_existing_allele_results.out
+}
 
 // Main Workflow
 workflow {
@@ -210,10 +286,6 @@ workflow {
     // Create new genotypes file
     Channel.fromPath( params.output )
         .set { output_ch }
-
-    // Create read pairs channel
-    Channel.fromFilePairs( params.reads, checkIfExists: true )
-        .set { read_pairs_ch }
 
     main:
 
@@ -277,5 +349,34 @@ workflow {
             finalise_surface_typer_results.out.surface_protein_variants
                 .collectFile(name: file("${results_dir}/${params.surface_protein_variants_out}"), keepHeader: true)
 
+        }
+
+        // PBP Typer
+        if (params.run_pbptyper){
+
+            // Check if contigs specified
+            if (params.contigs == ""){
+                println("Please specify contigs with --contigs.")
+                println("Print help with --contigs")
+                System.exit(1)
+            }
+
+            contig_paths = Channel
+                .fromPath(params.contigs, checkIfExists: true)
+                .map { file -> tuple(file.baseName, file) }
+
+            get_pbp_genes(contig_paths, file(params.gbs_blactam_db, checkIfExists: true), params.pbp_frac_align_threshold, params.pbp_frac_identity_threshold)
+
+            // Get PBP existing and new alleles
+            PBP1A(get_pbp_genes.out)
+            PBP2B(get_pbp_genes.out)
+            PBP2X(get_pbp_genes.out)
+
+            PBP1A.out
+                .collectFile(name: file("${results_dir}/${params.existing_pbp_alleles_out}"), keepHeader: true)
+            PBP2B.out
+                .collectFile(name: file("${results_dir}/${params.existing_pbp_alleles_out}"), keepHeader: true)
+            PBP2X.out
+                .collectFile(name: file("${results_dir}/${params.existing_pbp_alleles_out}"), keepHeader: true)
         }
 }

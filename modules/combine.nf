@@ -33,3 +33,19 @@ process finalise_surface_typer_results {
         -o ${pair_id}
     """
 }
+
+process finalise_pbp_existing_allele_results {
+
+    input:
+    // ID, existing PBP allele file
+    tuple val(pair_id), file(pbp_existing_allele)
+
+    output:
+    path("${pair_id}_existing_PBP_allele.txt")
+
+    """
+    combine_results.py pbp_typer \
+        -i ${pair_id} --pbp_existing_allele_results "${pbp_existing_allele}" \
+        -o ${pair_id}
+    """
+}

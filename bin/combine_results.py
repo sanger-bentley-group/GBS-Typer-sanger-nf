@@ -2,7 +2,7 @@
 from __future__ import print_function
 import argparse
 import sys
-from bin.file_utils import FileUtils
+from lib.file_utils import FileUtils
 
 
 def get_content_with_id(id, file):
@@ -94,6 +94,20 @@ def get_arguments():
                         help='Output prefix.')
     subparser_surface_typing.set_defaults(which='surface_typer')
 
+    subparser_pbp_typing = subparsers.add_parser(
+        'pbp_typer',
+        help='',
+        description='Combine PBP typer results.',
+    )
+
+    subparser_pbp_typing.add_argument('--id', '-i', dest='id', required=True,
+                        help='Sample ID.')
+    subparser_pbp_typing.add_argument('--pbp_existing_allele_results', '-p', dest='pbp_allele', required=True,
+                        help='Input surface typing incidence results file.')
+    subparser_pbp_typing.add_argument('--output', '-o', dest='output', required=True,
+                        help='Output prefix.')
+    subparser_pbp_typing.set_defaults(which='pbp_typer')
+
     return parser
 
 
@@ -124,6 +138,13 @@ def main():
         if args.surface_variants:
             surface_protein_variants_output_lines = get_content_with_id(args.id, args.surface_variants)
             FileUtils.write_output(surface_protein_variants_output_lines, args.output + "_surface_protein_variants.txt")
+
+    elif args.which == "pbp_typer":
+        # Add ID to PBP typer existing allele results
+        if args.pbp_allele:
+            pbp_typer_output_lines = get_content_with_id(args.id, args.pbp_allele)
+            FileUtils.write_output(pbp_typer_output_lines, args.output + "_existing_PBP_allele.txt")
+
     else:
         print("ERROR: Please specify a valid option.")
         parser.print_help()

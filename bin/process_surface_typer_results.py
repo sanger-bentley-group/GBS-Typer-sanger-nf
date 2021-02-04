@@ -2,7 +2,7 @@
 import argparse
 import sys
 import re
-from bin.file_utils import FileUtils
+from lib.file_utils import FileUtils
 
 
 variantLookup = {

@@ -5,10 +5,11 @@ import unittest
 from bin.process_serotyper_results import write_line, make_gene_dict, get_arguments
 
 
+
 class TestProcessResults(unittest.TestCase):
 
     def test_should_make_gene_dict(self):
-        actual = make_gene_dict('test_data/SERO_26237_7#5__fullgenes__GBS_seroT_Gene-DB_Final__results.txt', 10)
+        actual = make_gene_dict('test_data/input/SERO_26237_7#5__fullgenes__GBS_seroT_Gene-DB_Final__results.txt', 10)
         self.assertEqual(actual, {'III': ['III', 'III-1', '100.0', '267.595', '1snp', '', '0.581', '172', '0.011', '4', '4']}
                          )
 

@@ -7,8 +7,8 @@ from bin.get_targets_from_db import get_targets, write_line, write_fasta_file, w
 
 class TestProcessResults(unittest.TestCase):
 
-    TEST_TARGETS = 'test_data/seqs_of_interest.txt'
-    TEST_FASTA = 'test_data/GBS_Res_Gene-DB_Final_0.0.1.fasta'
+    TEST_TARGETS = 'test_data/input/seqs_of_interest.txt'
+    TEST_FASTA = 'test_data/input/GBS_Res_Gene-DB_Final_0.0.1.fasta'
 
     def test_get_targets(self):
         actual = get_targets(self.TEST_TARGETS)
@@ -38,8 +38,8 @@ class TestProcessResults(unittest.TestCase):
         self.assertEqual(actual, 0)
 
     def test_write_fasta_file(self):
-        write_fasta_file(self.TEST_FASTA, '7__PARCGBS__PARCGBS-1__7', 'test_data/CHECK_')
-        f = open('test_data/CHECK_7__PARCGBS__PARCGBS-1__7_ref.fna', "r")
+        write_fasta_file(self.TEST_FASTA, '7__PARCGBS__PARCGBS-1__7', 'test_data/output/CHECK_')
+        f = open('test_data/output/CHECK_7__PARCGBS__PARCGBS-1__7_ref.fna', "r")
         actual = "".join(f.readlines())
         self.assertEqual(actual, """>7__PARCGBS__PARCGBS-1__7\nCATCCTCATGGGGATTCCTCTATTTATGACGCGATGGTTCGTATGTCTCAA\n""")
 
@@ -53,16 +53,16 @@ class TestProcessResults(unittest.TestCase):
             '17__RPOBgbs__RPOBgbs-2__17',
             '18__RPOBgbs__RPOBgbs-3__18',
             '19__RPOBgbs__RPOBgbs-4__19']
-        write_target_fasta_files(targets, self.TEST_FASTA, 'test_data/CHECK_')
+        write_target_fasta_files(targets, self.TEST_FASTA, 'test_data/output/CHECK_')
         mock_write_fasta_file.assert_has_calls([
-            call(self.TEST_FASTA, '7__PARCGBS__PARCGBS-1__7', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '5__GYRAGBS__GYRAGBS-1__5', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '11__23S1__23S1-1__11', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '12__23S3__23S3-3__12', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '16__RPOBgbs__RPOBgbs-1__16', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '17__RPOBgbs__RPOBgbs-2__17', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '18__RPOBgbs__RPOBgbs-3__18', 'test_data/CHECK_'),
-            call(self.TEST_FASTA, '19__RPOBgbs__RPOBgbs-4__19', 'test_data/CHECK_')
+            call(self.TEST_FASTA, '7__PARCGBS__PARCGBS-1__7', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '5__GYRAGBS__GYRAGBS-1__5', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '11__23S1__23S1-1__11', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '12__23S3__23S3-3__12', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '16__RPOBgbs__RPOBgbs-1__16', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '17__RPOBgbs__RPOBgbs-2__17', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '18__RPOBgbs__RPOBgbs-3__18', 'test_data/output/CHECK_'),
+            call(self.TEST_FASTA, '19__RPOBgbs__RPOBgbs-4__19', 'test_data/output/CHECK_')
             ], any_order = False)
 
     def test_arguments(self):

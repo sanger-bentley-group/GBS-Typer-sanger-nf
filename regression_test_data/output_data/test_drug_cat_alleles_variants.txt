@@ -1,0 +1,2 @@
+ID	EC	FQ	OTHER	TET
+test	23S1:23S3	PARC:GYRA	neg	neg
