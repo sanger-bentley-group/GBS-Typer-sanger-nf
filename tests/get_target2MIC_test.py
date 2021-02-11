@@ -396,6 +396,12 @@ class TestGetTarget2MIC(unittest.TestCase):
                         'FQ': 'foobar:PARC-D10G',
                         'TET': 'foobar1:*TET*:foobar2',
                         'OTHER': 'neg',
+                    },
+                    '26189_8#339': {
+                        'EC': 'ec1',
+                        'FQ': 'fq1',
+                        'TET': 'foobar1:*TET*:foobar2',
+                        'OTHER': 'neg',
                     }
                 }
             ),
@@ -405,6 +411,10 @@ class TestGetTarget2MIC(unittest.TestCase):
                     '26189_8#338': {
                         'Contig': '.26189_8_338.6:44447-45407(+)',
                         'PBP_allele': '1||GBS_1A',
+                    },
+                    '26189_8#339': {
+                        'Contig': '.26189_8_338.6:44447-45407(+)',
+                        'PBP_allele': '1||GBS_1A',
                     }
                 }
             ),
@@ -412,7 +422,8 @@ class TestGetTarget2MIC(unittest.TestCase):
 
         expected_output = \
             'ID\tPBP\tTET\tEC\tFQ\tOTHER\n' + \
-            '26189_8#338\tFlag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,NA,NA,NA,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar1:*TET*:foobar2,>=,8,R\t*R23S1*:*RPLD1*:foobar,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar:PARC-D10G,NA,NA,NA,=,4,I\tneg,<=,1,S,<=,1,S,<=,1,U,<=,4,S,<=,0.5,U'
+            '26189_8#338\tFlag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,NA,NA,NA,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar1:*TET*:foobar2,>=,8,R\t*R23S1*:*RPLD1*:foobar,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar:PARC-D10G,NA,NA,NA,=,4,I\tneg,<=,1,S,<=,1,S,<=,1,U,<=,4,S,<=,0.5,U\n' + \
+            "26189_8#339\tFlag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,NA,NA,NA,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar1:*TET*:foobar2,>=,8,R\tec1,<=,0.25,S,<=,0.25,S,<=,2.0,S,<=,1.0,S,neg\tfq1,NA,NA,NA,Flag,Flag,Flag\tneg,<=,1,S,<=,1,S,<=,1,U,<=,4,S,<=,0.5,U"
 
         args = mock_get_arguments.return_value.parse_args()
         args.res_file = 'res_file'
