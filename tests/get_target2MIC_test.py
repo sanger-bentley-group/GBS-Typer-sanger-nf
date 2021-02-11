@@ -1,15 +1,11 @@
 import argparse
 import unittest
 from unittest.mock import patch, call, ANY
-from bin.get_target2MIC import MicPredictor
+from bin.get_target2MIC import MicPredictor, get_arguments, check_lists_equal, run, extract_pb2x_id
 
 
 class TestGetTarget2MIC(unittest.TestCase):
     """ Test class for the get_target2MIC module """
-
-    TEST_LANE = "26189_8#338"
-    TEST_GBS_FULLGENES_RESULTS_FILE = \
-        "test_data/" + TEST_LANE + "_SURFACE__fullgenes__GBS_Surface_Gene-DB_Final__results.txt"
 
     def setUp(self) -> None:
         self.__under_test = MicPredictor()
@@ -17,27 +13,28 @@ class TestGetTarget2MIC(unittest.TestCase):
     def test_initialise(self) -> None:
         self.__under_test.initialise()
         self.assertEqual({}, self.__under_test.output)
-        self.assertEqual(0.0, self.__under_test.pbp2x)
+        self.assertEqual(self.__under_test.PBP2X_DEFAULT, self.__under_test.pbp2x)
+        self.assertEqual('neg', self.__under_test.res_dict['PBP'])
         self.assertEqual('neg', self.__under_test.res_dict['EC'])
         self.assertEqual('neg', self.__under_test.res_dict['FQ'])
         self.assertEqual('neg', self.__under_test.res_dict['OTHER'])
         self.assertEqual('neg', self.__under_test.res_dict['TET'])
 
     def test_check_lists_equal(self):
-        self.assertTrue(self.__under_test.check_lists_equal(['ab', 'cd', 'ef'], ['cd', 'ef', 'ab']))
-        self.assertFalse(self.__under_test.check_lists_equal(['cd', 'ef'], ['cd', 'ef', 'ab']))
-        self.assertFalse(self.__under_test.check_lists_equal(['ab', 'cd', 'ef'], ['cd', 'ab']))
-        self.assertFalse(self.__under_test.check_lists_equal(['ab', 'cd', 'ef'], ['se', 'ab', 'cd']))
+        self.assertTrue(check_lists_equal(['ab', 'cd', 'ef'], ['cd', 'ef', 'ab']))
+        self.assertFalse(check_lists_equal(['cd', 'ef'], ['cd', 'ef', 'ab']))
+        self.assertFalse(check_lists_equal(['ab', 'cd', 'ef'], ['cd', 'ab']))
+        self.assertFalse(check_lists_equal(['ab', 'cd', 'ef'], ['se', 'ab', 'cd']))
 
     def test_get_arguments(self) -> None:
-        actual = self.__under_test.get_arguments().parse_args(
-            ['--res_file', 'res_file', '--output_prefix', 'out'])
-        self.assertEqual(argparse.Namespace(res_file='res_file', output='out'), actual)
+        actual = get_arguments().parse_args(
+            ['--res_file', 'res_file', '--pbp_file', 'pbp_file', '--output', 'out'])
+        self.assertEqual(argparse.Namespace(res_file='res_file', pbp_file='pbp_file', output_file='out'), actual)
 
     def test_get_arguments_short_options(self) -> None:
-        actual = self.__under_test.get_arguments().parse_args(['-r', 'res_file', '-o', 'out'])
+        actual = get_arguments().parse_args(['-r', 'res_file', '-p', 'pbp_file', '-o', 'out'])
         self.assertEqual(argparse.Namespace(
-                             res_file='res_file', output='out'), actual)
+                             res_file='res_file', pbp_file='pbp_file', output_file='out'), actual)
 
     def test_update_pbp_category_small_pbp2x(self) -> None:
         self.__under_test.pbp2x = 1
@@ -354,32 +351,6 @@ class TestGetTarget2MIC(unittest.TestCase):
             self.__under_test.output['OTHER']
         )
 
-    def test_read_res_alleles_file(self) -> None:
-        self.__under_test.read_res_alleles_file('\t', 'test_data/input/25292_2#85_res_alleles.txt')
-        print(self.__under_test.res_dict)
-        self.assertEqual(4, len(self.__under_test.res_dict))
-        self.assertEqual("ERMB(ERMB-1):MEF(MEF-1):23S1:23S3", self.__under_test.res_dict['EC'])
-        self.assertEqual("PARC:GYRA-V1A,M2Q,G3W,K4W", self.__under_test.res_dict['FQ'])
-        self.assertEqual(
-            "MsrD_MLS(MsrD_296):Ant6-Ia_AGly(Ant6-Ia_1633):Sat4A_AGly(Sat4A_586):Aph3-III_AGly(Aph3-III_268):msr(D)(msr(D)_2):ant(6)-Ia(ant(6)-Ia):aph(3')-III(aph(3')-III)",
-            self.__under_test.res_dict['OTHER']
-        )
-        self.assertEqual("TETO(TETO-1)", self.__under_test.res_dict['TET'])
-
-    def test_read_res_alleles_file_unexpected_format(self) -> None:
-        self.assertRaises(
-            ValueError,
-            self.__under_test.read_res_alleles_file,
-            '\t',
-            'test_data/input/25292_2#85_res_alleles-badformat.txt')
-
-    def test_read_res_alleles_file_bad_file(self) -> None:
-        self.assertRaises(
-            IOError,
-            self.__under_test.read_res_alleles_file,
-            '\t',
-            'test_data/input/non-existent.txt')
-
     def test_search_list(self) -> None:
         test_arr = ['fred1', 'bob3', 'bob4', 'jane345', 'mary-1234', 'david_22334']
 
@@ -394,21 +365,63 @@ class TestGetTarget2MIC(unittest.TestCase):
         self.assertTrue(self.__under_test.search_list(test_arr, r"FRED[1|3|6]"))
         self.assertFalse(self.__under_test.search_list([], r"jane345"))
 
-    @patch('bin.get_target2MIC.MicPredictor.read_res_alleles_file')
-    @patch('lib.file_utils.FileUtils.create_output_contents')
+    def test_extract_pb2x_id(self) -> None:
+        self.assertEqual('NA', extract_pb2x_id('FOOBAR'))
+        self.assertEqual('6', extract_pb2x_id('FOOBAR1:FOOBAR2:6'))
+        self.assertEqual('NA', extract_pb2x_id('FOOBAR1:FOOBAR2'))
+        self.assertEqual('NA', extract_pb2x_id(''))
+
+    def test_run_prediction(self):
+        res_dict = {
+            'EC': '*R23S1*:*RPLD1*:foobar',
+            'FQ': 'foobar:PARC-D10G',
+            'TET': 'foobar1:*TET*:foobar2',
+            'OTHER': 'neg',
+        }
+        self.__under_test.run_prediction(res_dict, self.__under_test.PBP2X_DEFAULT)
+
+    @patch('lib.file_utils.FileUtils.read_delimited_id_file_with_hdrs')
     @patch('lib.file_utils.FileUtils.write_output')
-    @patch('bin.get_target2MIC.MicPredictor.get_arguments')
-    def test_run(self, mock_get_arguments, mock_write_output, mock_create_output_contents, mock_res_file) -> None:
-        res_dict = {'EC': '*R23S1*:*RPLD1*:foobar'}
-        self.__under_test.pbp2x = 2
+    @patch('bin.get_target2MIC.get_arguments')
+    def test_run(self, mock_get_arguments, mock_write_output, mock_read_file) -> None:
+        """
+        Test the main run method
+        """
+        mock_read_file.side_effect = [
+            (
+                ['EC', 'FQ', 'TET', 'OTHER'],
+                {
+                    '26189_8#338': {
+                        'EC': '*R23S1*:*RPLD1*:foobar',
+                        'FQ': 'foobar:PARC-D10G',
+                        'TET': 'foobar1:*TET*:foobar2',
+                        'OTHER': 'neg',
+                    }
+                }
+            ),
+            (
+                ['Contig', 'PBP_allele'],
+                {
+                    '26189_8#338': {
+                        'Contig': '.26189_8_338.6:44447-45407(+)',
+                        'PBP_allele': '1||GBS_1A',
+                    }
+                }
+            ),
+        ]
 
-        args = self.__under_test.get_arguments().parse_args(['--res_file', 'res_file', '--output_prefix', 'out'])
+        expected_output = \
+            'ID\tPBP\tTET\tEC\tFQ\tOTHER\n' + \
+            '26189_8#338\tFlag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,NA,NA,NA,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar1:*TET*:foobar2,>=,8,R\t*R23S1*:*RPLD1*:foobar,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag\tfoobar:PARC-D10G,NA,NA,NA,=,4,I\tneg,<=,1,S,<=,1,S,<=,1,U,<=,4,S,<=,0.5,U'
 
-        mock_res_file.return_value = res_dict
-        self.__under_test.run()
+        args = mock_get_arguments.return_value.parse_args()
+        args.res_file = 'res_file'
+        args.pbp_file = 'pbp_file'
+        args.output_file = 'out'
 
-        mock_create_output_contents.assert_has_calls([call(ANY)])
-        mock_write_output.assert_has_calls([call(ANY, args.output + self.__under_test.MIC_PREDICTIONS_OUTPUT_FILE)])
+        run()
+
+        mock_write_output.assert_has_calls([call(expected_output, 'out')])
 
 
 

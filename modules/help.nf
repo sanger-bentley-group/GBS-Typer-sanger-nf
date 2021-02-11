@@ -10,15 +10,7 @@ def printHelp() {
   Additional options:
 
     Inputs:
-      --contigs                     Path of file containing FASTA contigs. Only use when
-                                    --run_pbptyper is specified. (Use wildcard '*' to specify multiple files,
-                                    e.g. 'data/*.fa')
-      --db_version                  Database version. (Default: 0.1.2)
-      --other_res_dbs               Paths to other resistance reference database(s). Must be FASTA format.
-                                    Specify 'none' to omit using other resistance databases.
-                                    (Default: 'db/0.1.0/ARGannot-DB/ARG-ANNOT.fasta'
-                                    from ARGannot_r3 of the SRST2 software, which includes non-redundant
-                                    ResFinder and CARD database genes).
+      --results_dir                 Results directory for output files. (Default: './results')
 
     Outputs:
       --results_dir                  Results directory for output files. (Default: './results')

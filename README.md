@@ -59,12 +59,12 @@ module load ISG/singularity
 module load nextflow
 ```
 
-3. For a single sample, run using bsub and add '-profile sanger' as an option, e.g.
+3. For a single sample, run using bsub and add '-profile singularity' as an option, e.g.
 ```
 bsub -G <your_team> -J <job_name> -o %J.out -e %J.err -R "select[mem>1000] rusage[mem=1000]" -M1000 "nextflow run main.nf --reads 'data/sampleID_{1,2}.fastq.gz' --output 'sampleID' -profile singularity"
 ```
 
-4. For multiple samples, also run using bsub and add '-profile sanger,lsf', e.g.
+4. For multiple samples, also run using bsub and add '-profile singularity,lsf', e.g.
 ```
 bsub -G <your_team> -J <job_name> -o %J.out -e %J.err -R "select[mem>1000] rusage[mem=1000]" -M1000 "nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' -profile singularity,lsf"
 ```
@@ -198,6 +198,7 @@ To enable the PBP typing pipeline provide the **--run_pbptyper** command line ar
 nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefix' --run_pbptyper --contigs 'data/*.fa'
 ```
 
+The contig fasta files must be named <sample_id>.fa.
 If existing PBP alleles are found, a tab-delimited file is created in the 'results' directory. The file contains the sample IDs (that are determined from the contig FASTA file names e.g. 25292_2#85 from data/25292_2#85.fa), the contig identifiers with start, end and forward(+)/reverse(-) positions, and the PBP allele identifier.
 
 ID | Contig | PBP_allele
@@ -215,6 +216,21 @@ If a new PBP allele is found in a sample, a FASTA file of amino acids is created
     VAQAGKTGTSNYTEDELAKIEATTGIYNSAVGTMAPDENFVGYTSKYTMAIWTGYKNRLT
     PLYGSQLDIATEVYRAMMSY
 
+
+### MIC (Minimum Inhibitory Concentration) Prediction
+The MIC prediction pipeline can be run standalone after serotyping, resistance and PBP typing have been run successfully.
+To run MIC prediction, use the following command:
+```
+nextflow run mic.nf --output 'output_file_prefix'
+```
+The output prefix must match that used for the prior typing pipeline run.
+This will create one tab-delimited **<output_file_prefix>_mic_predictions.txt** file in the 'results' directory. 
+e.g.
+
+ID | PBP | TET | EC | FQ | OTHER
+:---: | :---: | :---: | :---: | :---: | :---:
+26189_8#338 | Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,NA,NA,NA,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag,Flag | neg,<=,1,S,<=,1,S,<=,1,U,<=,4,S,<=,0.5,U | ErmB_MLS[ErmB_841]:23S1:23S3,>=,1,R,>=,1,R,<=,2.0,S,<=,1.0,S,pos | PARC:GYRA,NA,NA,NA,Flag,Flag,Flag | TetM_Tet[TetM_831],>=,8,R
+        
 
 ### Examples
 It is recommended you use the default parameters for specifying other resistance databases. However, to use different or multiple resistance databases with the GBS-specific resistance database, e.g. ARG-ANNOT and ResFinder in the db/0.0.2 directory, both with a minimum coverage of 70 and maximum divergence of 30:
@@ -245,6 +261,7 @@ To run **only** the PBP typing pipeline, use:
 nextflow run main.nf --output 'output_file_prefix' --run_sero_res false --run_pbptyper --contigs 'data/*.fa'
 ```
 The **--reads** parameter is not needed for the PBP typing pipeline.
+
 
 ## Dependencies
 All pipeline dependencies are built into the [docker hub dependencies image](https://hub.docker.com/repository/docker/sangerpathogens/gbs-typer-sanger-nf), used by the pipeline.

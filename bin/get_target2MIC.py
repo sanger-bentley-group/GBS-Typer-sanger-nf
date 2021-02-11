@@ -7,20 +7,20 @@ from lib.file_utils import FileUtils
 
 
 class MicPredictor:
-    """ Minimum Inhibitory Concentration prediction process class """
+    """ Minimum Inhibitory Concentration prediction class """
 
-    __DEBUG = True
+    __DEBUG = False
 
-    INPUT_FILE_DELIM = '\t'
     OUTPUT_FIELD_SEP = ','
     RES_TARGET_DELIM = ":"
-    MIC_PREDICTIONS_OUTPUT_FILE = "_mic_predictions.txt"
-    NUM_RES_FILE_FIELDS = 4
+    PBP2X_DEFAULT = 'NA'
+    OUTPUT_FIELDS = ['PBP', 'TET', 'EC', 'FQ', 'OTHER']
 
     def __init__(self):
         """ Default constructor """
-        self.initialise()
-
+        self.__res_dict = {}
+        self.__output_dict = {}
+        self.__pbp2X = self.PBP2X_DEFAULT
         self.actions = {
             self.update_pbp_category,
             self.update_er_cl_category,
@@ -51,73 +51,27 @@ class MicPredictor:
 
     @staticmethod
     def search_list(arr, regex):
+        """Search a text array, matching against a given regular expression"""
         for entry in arr:
             if re.search(regex, entry, re.IGNORECASE):
                 return True
         return False
 
     def initialise(self):
-        """Initialise variables"""
-        self.__pbp2X = 0.0
+        """Initialise state"""
         self.__output_dict = {}
-        # Some new initialisation for the res dict (avoids key errors)..
-        self.__res_dict = {
-            'EC': 'neg',
-            'FQ': 'neg',
-            'OTHER': 'neg',
-            'TET': 'neg',
-        }
+
+        # Ensure ordering of res_dict as per OUTPUT_FIELDS
+        for field in self.OUTPUT_FIELDS:
+            self.__res_dict[field] = 'neg'
 
     def log(self, text):
         """Log to standard out if in debug mode"""
         if self.__DEBUG:
             print(text)
 
-    @staticmethod
-    def check_lists_equal(list_1: list, list_2: list):
-        if len(list_1) != len(list_2):
-            return False
-        return sorted(list_1) == sorted(list_2)
-
-    @staticmethod
-    def get_arguments():
-        """Parse MIC predictor command line arguments"""
-        parser = argparse.ArgumentParser(description='Process MIC predictions.')
-        parser.add_argument('--res_file', '-r', dest='res_file', required=True,
-                            help='Input drug category allele variants file.')
-        parser.add_argument('--output_prefix', '-o', dest='output', required=True,
-                            help='Output prefix for filename.')
-        return parser
-
-    def read_res_alleles_file(self, delimiter, input_filename):
-        """Read the res alleles file into res_dict"""
-        try:
-            with open(input_filename, 'r') as fd:
-                lines = fd.readlines()
-                line_num = 0
-                for line in lines:
-                    line_num += 1
-
-                    fields = line.strip().split(delimiter)
-                    self.log("read_res_alleles_file: Read input file line: " + line)
-
-                    if line_num == 1:
-                        # read column headers
-                        columns = fields
-
-                        if not self.check_lists_equal(columns, list(self.__res_dict.keys())):
-                            raise ValueError('ERROR: Input file {} has unexpected fields'.format(input_filename))
-                    else:
-                        field_idx = 0
-                        for field in fields:
-                            self.__res_dict[columns[field_idx]] = field
-                            field_idx += 1
-
-        except IOError:
-            print('Cannot open filename starting "{}"'.format(input_filename))
-            raise
-
     def update_pbp_category(self):
+        """Create a PBP entry in the output_dict"""
         drug = {
             'ZOX': 'Flag,Flag,Flag',
             'FOX': 'Flag,Flag,Flag',
@@ -145,6 +99,7 @@ class MicPredictor:
         self.log('PBP: ' + self.__output_dict['PBP'])
 
     def update_er_cl_category(self):
+        """Create an EC entry in the output_dict"""
         drug = {
             'ERY': '<=,0.25,S',
             'CLI': '<=,0.25,S',
@@ -211,6 +166,7 @@ class MicPredictor:
         self.log('EC: ' + self.__output_dict['EC'])
 
     def update_gyra_parc_category(self):
+        """Create an FQ entry in the output_dict"""
         drug = {
             'CIP': 'NA,NA,NA',
             'LFX': '<=,2,S',
@@ -237,6 +193,7 @@ class MicPredictor:
         self.log('FQ: ' + self.__output_dict['FQ'])
 
     def update_tet_category(self):
+        """Create a TET entry in the output_dict"""
         drug = {
             'TET': '<=,2.0,S',
         }
@@ -253,6 +210,7 @@ class MicPredictor:
         self.log('TET: ' + self.__output_dict['TET'])
 
     def update_other_category(self):
+        """Create an OTHER entry in the output_dict"""
         drug = {
             'DAP': '<=,1,S',
             'VAN': '<=,1,S',
@@ -285,31 +243,100 @@ class MicPredictor:
                 if self.search_list(res_targets, r"RPOB"):
                     drug['RIF'] = 'Flag,Flag,Flag'
 
-        self.__output_dict['OTHER'] = self.OUTPUT_FIELD_SEP.join([
-            self.__res_dict['OTHER'],
-            drug['DAP'],
-            drug['VAN'],
-            drug['RIF'],
-            drug['CHL'],
-            drug['COT']])
+        self.__output_dict['OTHER'] = self.OUTPUT_FIELD_SEP.join([self.__res_dict['OTHER']] + list(drug.values()))
         self.log('OTHER: ' + self.__output_dict['OTHER'])
 
-    def run(self):
+    def run_prediction(self, input_res_dict, pbp2X):
+        """Run a MIC prediction"""
+        self.initialise()
 
-        args = self.get_arguments().parse_args()
+        self.__pbp2X = pbp2X
 
-        self.read_res_alleles_file(self.INPUT_FILE_DELIM, args.res_file)
+        # Copy in res dict values
+        for key in input_res_dict:
+            self.__res_dict[key] = input_res_dict[key]
 
         # Run all MIC predictor actions
         for action in self.actions:
             action()
 
-        output_contents = FileUtils.create_output_contents(self.output)
 
-        # Write mic predictions
-        FileUtils.write_output(output_contents, args.output + self.MIC_PREDICTIONS_OUTPUT_FILE)
+def check_lists_equal(list_1: list, list_2: list):
+    """Check if two lists contain the same items"""
+    if len(list_1) != len(list_2):
+        return False
+    return sorted(list_1) == sorted(list_2)
+
+
+def extract_pb2x_id(pbp_id_field: str):
+    """Extract a pb2x_id from the given pbp field"""
+    pb2x_id = MicPredictor.PBP2X_DEFAULT
+    fields = pbp_id_field.split(":")
+    if fields[0] != pbp_id_field:
+        try:
+            pb2x_id = fields[2]
+        except IndexError:
+            pass
+
+    return pb2x_id
+
+
+def get_arguments():
+    """Parse MIC predictor command line arguments"""
+    parser = argparse.ArgumentParser(description='Process MIC predictions.')
+    parser.add_argument('--res_file', '-r', dest='res_file', required=True,
+                        help='Input drug category allele variants file.')
+    parser.add_argument('--pbp_file', '-p', dest='pbp_file', required=True,
+                        help='Input pbp alleles file.')
+    parser.add_argument('--output', '-o', dest='output_file', required=True,
+                        help='Output filename.')
+    return parser
+
+
+def run():
+    """Main method"""
+    file_delim = '\t'
+    input_res_fields = ['EC', 'FQ', 'OTHER', 'TET']
+    input_pbp_fields = ['Contig', 'PBP_allele']
+    mic_predictor = MicPredictor()
+
+    # Get arguments
+    args = get_arguments().parse_args()
+
+    # Read the resistance input file
+    res_headers, res_rows = FileUtils.read_delimited_id_file_with_hdrs(
+        file_delim, args.res_file, len(input_res_fields)+1)
+    if not check_lists_equal(res_headers, input_res_fields):
+        raise RuntimeError('ERROR: File {} has an invalid format'.format(args.res_file))
+
+    # Read the pbp input file
+    pbp_headers, pbp_rows = FileUtils.read_delimited_id_file_with_hdrs(
+        file_delim, args.pbp_file, len(input_pbp_fields)+1)
+    if not check_lists_equal(pbp_headers, input_pbp_fields):
+        raise RuntimeError('ERROR: File {} has an invalid format'.format(args.pbp_file))
+
+    output = FileUtils.create_header_line(MicPredictor.OUTPUT_FIELDS)
+
+    for i, sample_id in enumerate(res_rows.keys()):
+        try:
+            """ TODO This pb2x_id determination needs checking """
+            pb2x_id = extract_pb2x_id(pbp_rows[sample_id]['PBP_allele'])
+        except KeyError:
+            pb2x_id = MicPredictor.PBP2X_DEFAULT
+            print('WARNING: Cannot find pb2x id for sample {}'.format(sample_id))
+
+        mic_predictor.run_prediction(res_rows[sample_id], pb2x_id)
+
+        output += sample_id
+        for col in MicPredictor.OUTPUT_FIELDS:
+            output += file_delim + mic_predictor.output[col]
+
+        if i < len(res_rows)-1:
+                output += '\n'
+
+    # Write MIC predictions
+    FileUtils.write_output(output, args.output_file)
 
 
 if __name__ == "__main__":
-    mic_predictor = MicPredictor()
-    sys.exit(mic_predictor.run())
+    sys.exit(run())

@@ -1,13 +1,14 @@
 process target2mic {
 
     input:
-    tuple val(pair_id), file(sero_results), file(res_incidence), file(res_alleles), file(res_variants)
-
+    file(res_alleles)
+    file(pbp_alleles)
+    file(output_file)
 
     output:
-    tuple val(pair_id), file("${pair_id}_mic_predictions.txt")
+    file(output_file)
 
     """
-    get_target2MIC.py --res_file "${res_alleles}" --output_prefix "${pair_id}"
+    get_target2MIC.py --res_file "${res_alleles}" --pbp_file "${pbp_alleles}" --output "${output_file}"
     """
 }

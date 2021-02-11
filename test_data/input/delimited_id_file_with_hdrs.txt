@@ -1,0 +1,4 @@
+ID	EC	FQ	OTHER
+25292_2#85	field1_1	field1_2	field1_3
+25292_2#86	field2_1	field2_2	field2_3
+25292_2#87	field3_1	field3_2	field3_3
