@@ -1,7 +1,5 @@
 process srst2_for_res_typing {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     tuple val(pair_id), file(reads) // ID and paired read files
     path db // File of resistance database file(s)

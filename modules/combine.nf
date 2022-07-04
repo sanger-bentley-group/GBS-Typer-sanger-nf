@@ -1,7 +1,5 @@
 process combine_results {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     // ID, serotyping results, resistance incidence, resistance alleles, resistance variants, surface protein incidence, surface protein variants, MLST allelic frequency
     tuple val(pair_id), file(sero_results), file(res_incidence), file(res_alleles), file(res_variants), file(surface_protein_incidence), file(surface_protein_variants), file(mlst_allelic_frequency)
@@ -24,8 +22,6 @@ process combine_results {
 }
 
 process finalise_sero_res_results {
-
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
 
     input:
     // ID, serotyping results, resistance incidence, resistance alleles and resistance variants results,
@@ -52,8 +48,6 @@ process finalise_sero_res_results {
 
 process finalise_surface_typer_results {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     // ID, surface protein incidence, surface protein variants
     tuple val(pair_id), file(surface_protein_incidence_in), file(surface_protein_variants_in)
@@ -75,8 +69,6 @@ process finalise_surface_typer_results {
 
 process finalise_pbp_existing_allele_results {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     // ID, existing PBP allele file
     tuple val(pair_id), file(pbp_existing_allele)
@@ -96,8 +88,6 @@ process finalise_pbp_existing_allele_results {
 
 process include_qc {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-    
     input:
     path qc_summary
     path qc_complete

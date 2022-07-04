@@ -341,9 +341,6 @@ workflow {
 
         if (params.run_qc){
 
-            // Set project directory
-            projectDir=params.qc_project_dir
-
             // Run assembly QC
             get_file_destinations(lanes_ch)
             get_qc_stats_from_pf(lanes_ch)
@@ -365,8 +362,12 @@ workflow {
 
             // Create a read pairs ch
             pf_data_symlink(not_failed_lanes_ch)
-            Channel.fromFilePairs( pf_data_symlink.out, checkIfExists: true )
-                .set { read_pairs_ch }
+
+            pf_data_symlink.out
+            .splitCsv(header:false, sep:"\t")
+            .map { row -> tuple(row[0], file(row[1])) }
+            .groupTuple()
+            .set { read_pairs_ch }
         }
 
         if (params.run_sero_res){

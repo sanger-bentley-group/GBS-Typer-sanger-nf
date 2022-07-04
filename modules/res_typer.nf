@@ -1,7 +1,5 @@
 process res_typer {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     tuple val(pair_id), path(gbs_fullgenes), path(gbs_consensus), path(other_fullgenes)
     val(min_read_depth) // Minimum read depth threshold

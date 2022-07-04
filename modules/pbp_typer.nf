@@ -1,7 +1,5 @@
 process get_pbp_genes {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-
     input:
     tuple val(pair_id), file(contigs)
     file(blactam_ref)
@@ -25,8 +23,6 @@ process get_pbp_genes {
 
 process get_pbp_alleles {
 
-    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
-    
     input:
     tuple val(pair_id), file(bed_file), file(contigs)
     val(pbp_type)

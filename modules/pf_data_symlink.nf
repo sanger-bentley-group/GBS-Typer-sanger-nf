@@ -4,16 +4,22 @@ process pf_data_symlink {
     path lanes_file
 
     output:
-    path "${data_dir}/*/*_{1,2}.fastq.gz"
+    file "${read_files}"
 
     script:
     pf_version=params.pf_version
-    data_dir="data_dir"
+    read_files="read_files.txt"
 
     """
-    #!/bin/bash
-
     module load pf/${pf_version}
-    pf data -t file -i ${lanes_file} -l ${data_dir}
+    pf data -t file -i ${lanes_file} > dir_list.txt
+    num=\$(cat dir_list.txt | wc -l)
+    for ((i=1;i<=\${num};i++))
+    do
+        dir=\$(sed -n "\${i}p" dir_list.txt)
+        lane=\$(echo \${dir} | rev | cut -d/ -f1 | rev)
+        echo -e "\${lane}\t\${dir}/\${lane}_1.fastq.gz" >> ${read_files}
+        echo -e "\${lane}\t\${dir}/\${lane}_2.fastq.gz" >> ${read_files}
+    done
     """
 }
