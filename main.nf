@@ -344,25 +344,17 @@ workflow {
             // Set project directory
             projectDir=params.qc_project_dir
 
-            // Create read pairs channel
-            if (params.lanes) {
-                lanes_ch = Channel.fromPath( params.lanes, checkIfExists: true )
-                get_file_destinations(lanes_ch)
-                get_qc_stats_from_pf(lanes_ch)
-                get_proportion_HET_SNPs(lanes_ch)
-
-            } else {
-                println("Error: You must specify a text file of lanes as --lanes <file with list of lanes>")
-                System.exit(1)
-            }
+            // Run assembly QC
+            get_file_destinations(lanes_ch)
+            get_qc_stats_from_pf(lanes_ch)
+            get_proportion_HET_SNPs(lanes_ch)
 
             headers_ch = Channel.fromPath( params.headers, checkIfExists: true )
 
+            assemblies_qc(get_file_destinations.out, get_qc_stats_from_pf.out, get_proportion_HET_SNPs.out, headers_ch, lanes_ch)
+
             // Run reads QC
             reads_qc(get_file_destinations.out, headers_ch, lanes_ch)
-
-            // Run assembly QC
-            assemblies_qc(get_file_destinations.out, get_qc_stats_from_pf.out, get_proportion_HET_SNPs.out, headers_ch, lanes_ch)
 
             // Collate QC reports
             collate_qc_data(reads_qc.out.qc_report, assemblies_qc.out.qc_report)
