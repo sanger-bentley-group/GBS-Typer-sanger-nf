@@ -1,5 +1,7 @@
 process surface_typer {
 
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
+
     input:
     tuple val(pair_id), file(reads)
     file(surface_protein_db)

@@ -1,5 +1,7 @@
 process srst2_for_res_typing {
 
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
+
     input:
     tuple val(pair_id), file(reads) // ID and paired read files
     path db // File of resistance database file(s)
@@ -21,6 +23,8 @@ process srst2_for_res_typing {
 
 process split_target_RES_sequences {
 
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
+
     input:
     file(fasta_file) // FASTA file of GBS target sequences
     file(targets_file) // Text file of GBS targets of interest
@@ -34,6 +38,8 @@ process split_target_RES_sequences {
 }
 
 process split_target_RES_seq_from_sam_file {
+
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
 
     input:
     tuple val(pair_id), file(bam_file) // ID and corresponding BAM file from mapping
@@ -58,6 +64,8 @@ process split_target_RES_seq_from_sam_file {
 }
 
 process freebayes {
+
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
 
     input:
     val(pair_id) // ID

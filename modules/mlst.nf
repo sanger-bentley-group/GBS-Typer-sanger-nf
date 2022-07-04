@@ -1,5 +1,7 @@
 process srst2_for_mlst {
 
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
+
     input:
     tuple val(pair_id), file(reads) // ID and paired read files
     val(min_coverage) // String of minimum coverage parameter(s) for SRST2
@@ -23,6 +25,8 @@ process srst2_for_mlst {
 }
 
 process get_mlst_allele_and_pileup {
+
+    container 'bluemoon222/gbs-typer-sanger-nf:0.0.7'
 
     input:
     tuple val(pair_id), file(bam_file), file(results_file), file(mlst_alleles)
