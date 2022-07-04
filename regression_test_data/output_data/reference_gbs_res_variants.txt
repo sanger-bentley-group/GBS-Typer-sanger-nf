@@ -1,2 +1,2 @@
-Sample_id	23S1_SNP	23S3_SNP	GYRA_SNP	PARC_SNP
+lane_id	23S1_SNP	23S3_SNP	GYRA_SNP	PARC_SNP
 test	*	*	*	*

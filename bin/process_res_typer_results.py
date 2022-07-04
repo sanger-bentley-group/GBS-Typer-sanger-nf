@@ -11,6 +11,7 @@ from collections import defaultdict
 from lib.six_frame_translation import six_frame_translate, extract_frame_aa, codon2aa
 from lib.file_io import get_seq_content
 from lib.file_utils import FileUtils
+from lib.get_headers import read_header_json
 
 class nSeq(str): # Nucleotide sequence
     pass
@@ -172,15 +173,6 @@ snpOffset.update({
 geneAlleleDict = defaultdict(lambda: [])
 
 EOL_SEP = "\n"
-
-
-def read_header_json(header_file):
-    with open(header_file, 'r') as file:
-        header_json = file.read()
-
-    header_dict = json.loads(header_json)
-
-    return header_dict
 
 
 def update_presence_absence_target(gene, allele, depth, gbs_res_target_dict):

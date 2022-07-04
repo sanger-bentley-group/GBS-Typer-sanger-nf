@@ -1,0 +1,5 @@
+lane_id	contig_no	contig_no_status
+test_lane1	1	PASS
+test_lane2	500	FAIL
+test_lane3	3	PASS
+test_lane4	501	FAIL

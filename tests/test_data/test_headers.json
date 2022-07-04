@@ -1,0 +1,30 @@
+{
+    "relative_abundance": [
+        "rel_abundance",
+        "rel_abundance_status"
+    ],
+    "contig_number": [
+        "contig_no",
+        "contig_no_status"
+    ],
+    "contig_gc_content": [
+        "gc_content",
+        "gc_content_status"
+    ],
+    "genome_length": [
+        "genome_len",
+        "genome_len_status"
+    ],
+    "coverage_depth": [
+        "cov_depth",
+        "cov_depth_status"
+    ],
+    "coverage_breadth": [
+        "cov_breadth",
+        "cov_breadth_status"
+    ],
+    "het_snps": [
+        "HET_SNPs",
+        "HET_SNPs_status"
+    ]
+}

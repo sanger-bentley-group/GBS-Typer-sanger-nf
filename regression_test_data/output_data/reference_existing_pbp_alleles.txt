@@ -1,4 +1,4 @@
-Sample_id	Contig	PBP_allele
+lane_id	Contig	PBP_allele
 test	.26077_6_118.11:39458-40418(+)	1||GBS_1A
 test	.26077_6_118.11:51259-52297(-)	1||GBS_2X
 test	.26077_6_118.2:185771-186836(+)	1||GBS_2B

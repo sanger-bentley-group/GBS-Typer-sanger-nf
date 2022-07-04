@@ -3,7 +3,6 @@ process combine_results {
     // ID, serotyping results, resistance incidence, resistance alleles, resistance variants, surface protein incidence, surface protein variants, MLST allelic frequency
     tuple val(pair_id), file(sero_results), file(res_incidence), file(res_alleles), file(res_variants), file(surface_protein_incidence), file(surface_protein_variants), file(mlst_allelic_frequency)
     path config
-    path version
 
     output:
     path("${pair_id}_id_combined_output.txt") optional true
@@ -17,7 +16,6 @@ process combine_results {
         -v "${res_variants}" \
         -m "${mlst_allelic_frequency}" \
         -x "${surface_protein_incidence}" \
-        -n "${version}" \
         -o ${pair_id}
     """
 }
@@ -84,5 +82,26 @@ process finalise_pbp_existing_allele_results {
         -t ${config} \
         --pbp_existing_allele_results "${pbp_existing_allele}" \
         -o ${pair_id}
+    """
+}
+
+process include_qc {
+    input:
+    path qc_summary
+    path qc_complete
+    path in_silico
+    path config
+
+    output:
+    path("${output}")
+
+    script:
+    output=qc_and_in_silico.txt
+    """
+    include_qc.py -h ${config} \
+        -s ${qc_summary} \
+        -c ${qc_complete} \
+        -i ${in_silico} \
+        -o ${output}
     """
 }

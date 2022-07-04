@@ -1,0 +1,5 @@
+lane_id	status
+test_lane1	PASS
+test_lane2	FAIL
+test_lane3	FAIL
+test_lane4	

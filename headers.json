@@ -1,7 +1,19 @@
 {
     "id": [
-        "Sample_id"
+        "lane_id"
     ],
+    "qc_summary": {
+        "status": "overall_qc_status"
+    },
+    "qc_complete": {
+        "rel_abundance_status": "rel_abundance_status",
+        "contig_no_status": "contig_no_status",
+        "gc_content_status": "contig_gc_content_status",
+        "genome_len_status": "genome_len_status",
+        "cov_depth_status": "cov_depth_status",
+        "cov_breadth_status": "cov_breadth_status",
+        "HET_SNPs_status": "HET_SNPs_status"
+    },
     "combine_all": {
         "Serotype": "cps_type",
         "ST": "ST",
@@ -54,8 +66,7 @@
         "23S1_SNP": "23S1_SNP",
         "23S3_SNP": "23S3_SNP",
         "GYRA_SNP": "gyrA_SNP",
-        "PARC_SNP": "parC_SNP",
-        "version": "version"
+        "PARC_SNP": "parC_SNP"
     },
     "surface_inc": [
         "ALP1",
@@ -123,5 +134,33 @@
     "pbp_allele": [
         "Contig",
         "PBP_allele"
+    ],
+    "relative_abundance": [
+        "rel_abundance",
+        "rel_abundance_status"
+    ],
+    "contig_number": [
+        "contig_no",
+        "contig_no_status"
+    ],
+    "contig_gc_content": [
+        "gc_content",
+        "gc_content_status"
+    ],
+    "genome_length": [
+        "genome_len",
+        "genome_len_status"
+    ],
+    "coverage_depth": [
+        "cov_depth",
+        "cov_depth_status"
+    ],
+    "coverage_breadth": [
+        "cov_breadth",
+        "cov_breadth_status"
+    ],
+    "het_snps": [
+        "HET_SNPs",
+        "HET_SNPs_status"
     ]
 }

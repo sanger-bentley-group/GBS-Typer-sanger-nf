@@ -1,0 +1,5 @@
+lane_id	rel_abundance	rel_abundance_status
+test_lane1	92.38	PASS
+test_lane2	2.38	FAIL
+test_lane3	70.0	FAIL
+test_lane4		

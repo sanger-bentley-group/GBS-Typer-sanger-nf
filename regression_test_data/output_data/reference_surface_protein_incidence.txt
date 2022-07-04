@@ -1,2 +1,2 @@
-Sample_id	ALP1	ALP23	ALPHA	HVGA	PI1	PI2A1	PI2A2	PI2B	RIB	SRR1	SRR2
+lane_id	ALP1	ALP23	ALPHA	HVGA	PI1	PI2A1	PI2A2	PI2B	RIB	SRR1	SRR2
 test	neg	pos	neg	neg	pos	pos	neg	neg	neg	pos	neg

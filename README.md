@@ -119,21 +119,21 @@ This will create three tab-delimited files in a 'results' directory within the c
 1. **\<output_file_prefix\>_serotype_res_incidence.txt** - Gives the serotype and presence/absence (i.e. +/-) of antibiotic resistance genes (GBS-specific alleles and ResFinder/ARG-ANNOT genes)
 e.g. Isolate Strep B sample 25292_2#105 has serotype II and have genes: 23S1, 23S3, GYRA, lsaC and tetM
 
-Sample_id | Serotype | 23S1 | 23S3 | CAT | ermB | ermT | FOSA | GYRA | lnuB | lsaC | mefA | MPHC | MSRA | msrD | PARC | RPOBGBS-1 | RPOBGBS-2 | RPOBGBS-3 | RPOBGBS-4 | SUL2 | tetB | tetL | tetM | tetO | tetS
+lane_id | Serotype | 23S1 | 23S3 | CAT | ermB | ermT | FOSA | GYRA | lnuB | lsaC | mefA | MPHC | MSRA | msrD | PARC | RPOBGBS-1 | RPOBGBS-2 | RPOBGBS-3 | RPOBGBS-4 | SUL2 | tetB | tetL | tetM | tetO | tetS
 :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---:
 25292_2#105 | II | pos | pos | neg | neg | neg | neg | pos | neg | pos | neg | neg | neg | neg | neg | neg | neg | neg | neg | neg | neg | neg | pos | neg | neg
 
 2. **\<output_file_prefix\>_gbs_res_variants.txt** - Gives the SNP variants for GBS-specific resistance genes
 e.g. Isolate Strep B sample 25292_2#105 have common variants 23S1, 23S3 and GYRA, but replacement of amino acid S by Q in position 17 of the PARC protein sequence
 
-Sample_id | 23S1 | 23S3 | GYRA | PARC | RPOBGBS-1 | RPOBGBS-2 | RPOBGBS-3 | RPOBGBS-4
+lane_id | 23S1 | 23S3 | GYRA | PARC | RPOBGBS-1 | RPOBGBS-2 | RPOBGBS-3 | RPOBGBS-4
 :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---:
 25292_2#105 | * | * | * | Q17S | | | | |
 
 3. **\<output_file_prefix\>_drug_cat_alleles_variants.txt** - Gives the GBS-specific variants and other resistance genes and alleles for drug categories: EC (macrolides, lincosamides, streptogramins or oxazolidinones), FQ (fluoroquinolones), OTHER (other antibiotics) and TET (tetracyclines)
 e.g. Isolate Step B sample 25292_2#105 have GBS-specific variants: erythromycin-resistant 23S1 and 23S3, fluoroquinolone-resistant PARC and GYRA, and other resistance allele tetracycline-resistant tet(M)_1 of gene tet(M) (as specified by gene[allele])
 
-Sample_id | EC | FQ | OTHER | TET
+lane_id | EC | FQ | OTHER | TET
 :---: | :---: | :---: | :---: | :---:
 25292_2#105 | 23S1:23S3 | PARC-Q17S:GYRA | neg | tet(M)[tet(M)_1]
 
@@ -141,7 +141,7 @@ Sample_id | EC | FQ | OTHER | TET
 ### MLST Output
 **When specifying `--run_mlst`**
 
-This will produce a new MLST log file `<output_file_prefix>_new_mlst_alleles.log` indicating whether new MLST alleles have been found for each sample (where there are mismatches with sufficient read depth at least the value specified --mlst_min_read_depth [Default: 30]). If it includes "<sample_id>: New MLST alleles found." then a FASTA file for the corresponding sample `<sampleID>_new_mlst_alleles.fasta` and a pileup file `<sampleID>_new_mlst_pileup.txt` are generated.
+This will produce a new MLST log file `<output_file_prefix>_new_mlst_alleles.log` indicating whether new MLST alleles have been found for each sample (where there are mismatches with sufficient read depth at least the value specified --mlst_min_read_depth [Default: 30]). If it includes "<lane_id>: New MLST alleles found." then a FASTA file for the corresponding sample `<sampleID>_new_mlst_alleles.fasta` and a pileup file `<sampleID>_new_mlst_pileup.txt` are generated.
 
 For other samples that have no new MLST alleles and only have existing sequence types, these existing types are generated in `<output_file_prefix>_existing_sequence_types.txt`. If "None found" for a sample then no sequence types were found with sufficient read depth at least the value specified by --mlst_min_read_depth [Default: 30]).
 
@@ -153,14 +153,14 @@ This will create two tab-delimited files in the 'results' directory
 1. **\<output_file_prefix\>_surface_protein_incidence.txt**
 This shows the incidence of different surface protein alleles in the Strep B sample(s), e.g.
 
-Sample_id | alp1 | alp2/3 | alpha | hvgA | PI1 | PI2A1 | PI2A2 | PI2B | rib | srr1 | srr2
+lane_id | alp1 | alp2/3 | alpha | hvgA | PI1 | PI2A1 | PI2A2 | PI2B | rib | srr1 | srr2
 :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---:
 26189_8#338 | neg | pos | neg | neg | pos | pos | neg | neg | neg | pos | neg
 
 2. **\<output_file_prefix\>_surface_protein_variants.txt**
 This shows all the surface proteins in the Strep B sample(s), e.g.
 
-Sample_id | ALPH | hvgA | PILI | SRR
+lane_id | ALPH | hvgA | PILI | SRR
 :---: | :---: | :---: | :---: | :---:
 26189_8#338 | alp2/3 | neg | PI1:PI2A1 | srr1
 
@@ -173,7 +173,7 @@ nextflow run main.nf --reads 'data/*_{1,2}.fastq.gz' --output 'output_file_prefi
 
 If existing PBP alleles are found, a tab-delimited file is created in the 'results' directory. The file contains the sample IDs (that are determined from the contig FASTA file names e.g. 25292_2#85 from data/25292_2#85.fa), the contig identifiers with start, end and forward(+)/reverse(-) positions, and the PBP allele identifier.
 
-Sample_id | Contig | PBP_allele
+lane_id | Contig | PBP_allele
 :---: | :---: | :---:
 25292_2#85 | .25292_2_85.9:39495-40455(+) | 2\|\|GBS_1A
 26077_6#118 | .26077_6_118.11:39458-40418(+) | 1\|\|GBS_1A

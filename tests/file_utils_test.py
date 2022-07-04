@@ -24,11 +24,11 @@ class TestFileUtils(unittest.TestCase):
 
     def test_write_pandas_output(self):
         final_df = pd.DataFrame.from_dict({
-            'Sample_id': {0: '25292_2#85'},
+            'lane_id': {0: '25292_2#85'},
             'cps_type': {0: 'III'},
             'ST': {0: 'ST-1'}})
         FileUtils.write_pandas_output(final_df, self.TEST_OUTPUT)
         f = open(self.TEST_OUTPUT, "r")
         actual = "".join(f.readlines())
         os.remove(self.TEST_OUTPUT)
-        self.assertEqual(actual, """Sample_id\tcps_type\tST\n25292_2#85\tIII\tST-1\n""")
+        self.assertEqual(actual, """lane_id\tcps_type\tST\n25292_2#85\tIII\tST-1\n""")

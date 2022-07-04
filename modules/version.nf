@@ -1,20 +1,24 @@
-process get_version {
+process add_version {
     input:
+    path tab_file
 
     output:
     path("${output}")
 
     script:
-    output="version.txt"
     version=params.version
+    output="output.txt"
     """
     echo "version" > ${output}
 
     if [ -z ${version} ];
     then
-        echo \$(git -C $baseDir describe --tags) >> ${output}
+        use_version=\$(echo \$(git -C $baseDir describe --tags))
     else
-        echo ${version} >> ${output}
+        use_version=\$(echo ${version})
     fi
+
+    head -1 ${tab_file} | sed -e 's/\$/\tversion/' > ${output}
+    sed '1d' ${tab_file} | sed -e "s/\$/\t\${use_version}/" >> ${output}
     """
 }

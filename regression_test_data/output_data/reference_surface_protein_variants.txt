@@ -1,2 +1,2 @@
-Sample_id	ALPH	HVGA	PILI	SRR
+lane_id	ALPH	HVGA	PILI	SRR
 test	ALP23	neg	PI1:PI2A1	SRR1

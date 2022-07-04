@@ -1,0 +1,5 @@
+lane_id	rel_abundance	rel_abundance_status	contig_no	contig_no_status	gc_content	gc_content_status	genome_len	genome_len_status	cov_depth	cov_depth_status	cov_breadth	cov_breadth_status	HET_SNPs	HET_SNPs_status
+test_lane1	92.38	PASS	1	PASS	1	PASS	1	PASS	1	PASS	1	PASS	1	PASS
+test_lane2	2.38	FAIL	500	FAIL	1	FAIL	1	FAIL	1	FAIL	1	FAIL	1	FAIL
+test_lane3	70	FAIL	3	PASS	1	PASS	1	PASS	1	PASS	1	PASS	1	PASS
+test_lane4			501	FAIL	1	FAIL	1	FAIL	1	FAIL	1	FAIL	1	FAIL

@@ -1,2 +1,2 @@
 lane_id	cps_type	ST	adhP	pheS	atr	glnA	sdhA	glcK	tkt	aac(6')-aph(2'')	ant(6-Ia)	aph(3'-III)	aadE	cat(pc194)	catQ	ermA	ermB	ermT	lnuB	lnuC	lsaC	lsaE	mefA	msrD	tetB	tetL	tetM	tetW	tetO	tetS	tetO32O	tetOW	tetOW32O	tetOW32OWO	tetOWO	tetSM	tetW32O	alp1	alp2/3	alpha	hvgA	PI1	PI2A1	PI2A2	PI2B	rib	srr1	srr2	23S1_SNP	23S3_SNP	gyrA_SNP	parC_SNP	version
-test	II	1	1	1	2	1	1	2	2	neg	neg	neg	neg	neg	neg	pos	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	pos	neg	neg	pos	pos	neg	neg	neg	pos	neg	*	*	*	*	vtest
+test_lane1	II	1	1	1	2	1	1	2	2	neg	neg	neg	neg	neg	neg	pos	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	neg	pos	neg	neg	pos	pos	neg	neg	neg	pos	neg	*	*	*	*	vtest

@@ -15,7 +15,22 @@ include {surface_typer} from './modules/surface_typer.nf'
 include {srst2_for_mlst; get_mlst_allele_and_pileup} from './modules/mlst.nf'
 include {get_pbp_genes; get_pbp_alleles} from './modules/pbp_typer.nf'
 include {finalise_sero_res_results; finalise_surface_typer_results; finalise_pbp_existing_allele_results; combine_results} from './modules/combine.nf'
-include {get_version} from './modules/version.nf'
+include {add_version} from './modules/version.nf'
+include {pf_data_symlink} from './modules/pf_data_symlink.nf'
+include {get_lane_list} from './modules/get_lane_list.nf'
+
+// Import GBS QC modules
+include {get_file_destinations} from './GBS_QC_nf/modules/get_file_destinations.nf'
+include {relative_abundance} from './GBS_QC_nf/modules/relative_abundance.nf'
+include {number_of_contigs} from './GBS_QC_nf/modules/number_of_contigs.nf'
+include {collate_qc_data} from './GBS_QC_nf/modules/collate_qc_data.nf'
+include {contig_gc_content} from './GBS_QC_nf/modules/contig_gc_content.nf'
+include {genome_length} from './GBS_QC_nf/modules/genome_length.nf'
+include {get_qc_stats_from_pf} from './GBS_QC_nf/modules/get_qc_stats_from_pf.nf'
+include {depth_of_coverage} from './GBS_QC_nf/modules/depth_of_coverage.nf'
+include {breadth_of_coverage} from './GBS_QC_nf/modules/breadth_of_coverage.nf'
+include {get_proportion_HET_SNPs} from './GBS_QC_nf/modules/get_proportion_HET_SNPs.nf'
+include {HET_SNPs} from './GBS_QC_nf/modules/HET_SNPs.nf'
 
 
 // Help message
@@ -24,11 +39,17 @@ if (params.help){
     exit 0
 }
 
-// Check if reads specified
-if (params.run_sero_res | params.run_mlst | params.run_surfacetyper){
+// Check if QC specified
+if (params.run_qc){
+    if (params.lanes == ""){
+        println("Please specify a file with a list of lane ids.")
+        System.exit(1)
+    }
+    // Create lanes channel
+    lanes_ch = Channel.fromPath( params.lanes, checkIfExists: true )
+} else {
     if (params.reads == ""){
         println("Please specify reads with --reads.")
-        println("Print help with --help")
         System.exit(1)
     }
     // Create read pairs channel
@@ -39,13 +60,11 @@ if (params.run_sero_res | params.run_mlst | params.run_surfacetyper){
 // Check if output specified
 if (params.output == ""){
     println("Please specify and output prefix with --output.")
-    println("Print help with --help")
     System.exit(1)
 }
 
 if (!params.run_sero_res && !params.run_surfacetyper && !params.run_mlst && !params.run_pbptyper){
     println("Please specify one or more pipelines to run.")
-    println("Print help with --help")
     System.exit(1)
 }
 
@@ -125,7 +144,52 @@ params.surface_protein_incidence_out = "${params.output}_surface_protein_inciden
 params.surface_protein_variants_out = "${params.output}_surface_protein_variants.txt"
 params.existing_mlst_alleles_out = "${params.output}_existing_sequence_types.txt"
 params.new_mlst_alleles_status = "${params.output}_new_mlst_alleles.log"
+params.gbs_typer_report_no_qc = "${params.output}_gbs_typer_report_no_qc.txt"
 params.gbs_typer_report = "${params.output}_gbs_typer_report.txt"
+
+// Workflow for reads QC
+workflow reads_qc {
+    take:
+    file_dest_ch
+    headers_ch
+    lanes_ch
+
+    main:
+    relative_abundance(file_dest_ch, headers_ch, lanes_ch)
+    qc_report = relative_abundance.out
+
+    emit:
+    qc_report
+}
+
+// Workflow for assemblies QC
+workflow assemblies_qc {
+    take:
+    file_dest_ch
+    qc_stats_ch
+    het_stats_ch
+    headers_ch
+    lanes_ch
+
+    main:
+    number_of_contigs(file_dest_ch, headers_ch, lanes_ch)
+    contig_gc_content(file_dest_ch, headers_ch, lanes_ch)
+    genome_length(file_dest_ch, headers_ch, lanes_ch)
+    depth_of_coverage(qc_stats_ch, headers_ch, lanes_ch)
+    breadth_of_coverage(qc_stats_ch, headers_ch, lanes_ch)
+    HET_SNPs(het_stats_ch, headers_ch, lanes_ch)
+
+    number_of_contigs.out
+    .combine(contig_gc_content.out)
+    .combine(genome_length.out)
+    .combine(depth_of_coverage.out)
+    .combine(breadth_of_coverage.out)
+    .combine(HET_SNPs.out)
+    .set { qc_report }
+
+    emit:
+    qc_report
+}
 
 // Resistance mapping with the GBS resistance database
 workflow GBS_RES {
@@ -273,11 +337,45 @@ workflow PBP2X {
 // Main Workflow
 workflow {
 
-    // Create new genotypes file
-    Channel.fromPath( params.output )
-        .set { output_ch }
-
     main:
+
+        if (params.run_qc){
+
+            // Set project directory
+            projectDir=params.qc_project_dir
+
+            // Create read pairs channel
+            if (params.lanes) {
+                lanes_ch = Channel.fromPath( params.lanes, checkIfExists: true )
+                get_file_destinations(lanes_ch)
+                get_qc_stats_from_pf(lanes_ch)
+                get_proportion_HET_SNPs(lanes_ch)
+
+            } else {
+                println("Error: You must specify a text file of lanes as --lanes <file with list of lanes>")
+                System.exit(1)
+            }
+
+            headers_ch = Channel.fromPath( params.headers, checkIfExists: true )
+
+            // Run reads QC
+            reads_qc(get_file_destinations.out, headers_ch, lanes_ch)
+
+            // Run assembly QC
+            assemblies_qc(get_file_destinations.out, get_qc_stats_from_pf.out, get_proportion_HET_SNPs.out, headers_ch, lanes_ch)
+
+            // Collate QC reports
+            collate_qc_data(reads_qc.out.qc_report, assemblies_qc.out.qc_report)
+
+            // Get list of lane ids that did not FAIL
+            get_lane_list(collate_qc_data.out.complete)
+            not_failed_lanes_ch=get_lane_list.out
+
+            // Create a read pairs ch
+            pf_data_symlink(not_failed_lanes_ch)
+            Channel.fromFilePairs( pf_data_symlink.out, checkIfExists: true )
+                .set { read_pairs_ch }
+        }
 
         if (params.run_sero_res){
 
@@ -381,19 +479,32 @@ workflow {
         // Combine serotype, resistance, allelic profile, surface typer and GBS resistance variants
         if (params.run_sero_res & params.run_surfacetyper & params.run_mlst){
 
-            // Get version of pipeline
-            get_version()
-            version_ch = get_version.out
-
             // Combine serotype and resistance type results for each sample
             combined_ch = serotyping.out
                 .join(res_typer.out.res_out)
                 .join(surface_typer.out)
                 .join(MLST.out.srst2_results)
 
-            combine_results(combined_ch, file(params.config, checkIfExists: true), version_ch)
+            combine_results(combined_ch, file(params.config, checkIfExists: true))
 
             combine_results.out
-                .collectFile(name: file("${results_dir}/${params.gbs_typer_report}"), keepHeader: true, sort: true)
+                .collectFile(name: file("${results_dir}/${params.gbs_typer_report_no_qc}"), keepHeader: true, sort: true)
+                .set { in_silico_ch }
+
+            // Include QC in final output
+            if (params.run_qc) {
+                include_qc(collate_qc_data.out.summary, collate_qc_data.out.complete, in_silico_ch, headers_ch)
+                report_ch = include_qc.out
+            } else {
+                report_ch = in_silico_ch
+            }
+
+            // Get version of pipeline
+            add_version(report_ch)
+
+            add_version.out
+            .subscribe { it ->
+                it.copyTo(file("${results_dir}/${params.gbs_typer_report}"))
+            }
         }
 }
