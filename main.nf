@@ -349,7 +349,7 @@ workflow {
             get_qc_stats_from_pf(lanes_ch)
             get_proportion_HET_SNPs(lanes_ch)
 
-            headers_ch = Channel.fromPath( params.headers, checkIfExists: true )
+            headers_ch = Channel.fromPath( params.config, checkIfExists: true )
 
             assemblies_qc(get_file_destinations.out, get_qc_stats_from_pf.out, get_proportion_HET_SNPs.out, headers_ch, lanes_ch)
 
