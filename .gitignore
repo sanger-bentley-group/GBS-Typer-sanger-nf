@@ -11,3 +11,4 @@ data
 tests/test_data/output/*.txt
 tests/regression_test_data/test_data
 **/__pycache__
+*.img
