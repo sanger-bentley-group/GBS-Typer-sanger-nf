@@ -12,7 +12,7 @@ include {serotyping} from './modules/serotyping.nf'
 include {srst2_for_res_typing; split_target_RES_seq_from_sam_file; split_target_RES_sequences; freebayes} from './modules/res_alignments.nf'
 include {res_typer} from './modules/res_typer.nf'
 include {surface_typer} from './modules/surface_typer.nf'
-include {srst2_for_mlst; get_mlst_allele_and_pileup} from './modules/mlst.nf'
+include {getmlst_for_srst2; srst2_for_mlst; get_mlst_allele_and_pileup} from './modules/mlst.nf'
 include {get_pbp_genes; get_pbp_alleles} from './modules/pbp_typer.nf'
 include {finalise_sero_res_results; finalise_surface_typer_results; finalise_pbp_existing_allele_results; combine_results} from './modules/combine.nf'
 include {get_version} from './modules/version.nf'
@@ -187,8 +187,11 @@ workflow MLST {
         reads
 
     main:
+        // Get MLST database for all downstream processes
+        getmlst_for_srst2()
+
         // Run SRST2 MLST
-        srst2_for_mlst(reads, params.mlst_min_coverage)
+        srst2_for_mlst(getmlst_for_srst2.out.getmlst_results, reads, params.mlst_min_coverage)
 
         // Get new consensus allele and pileup data
         get_mlst_allele_and_pileup(srst2_for_mlst.out.bam_and_srst2_results, params.mlst_min_read_depth)
