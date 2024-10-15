@@ -1,6 +1,19 @@
+process getmlst_for_srst2 {
+    output:
+    tuple path(mlst_fasta), path(mlst_profile_csv), emit: getmlst_results
+
+    script:
+    mlst_fasta="Streptococcus_agalactiae.fasta"
+    mlst_profile_csv="profiles_csv"
+    """
+    getmlst.py --species 'Streptococcus agalactiae'
+    """
+}
+
 process srst2_for_mlst {
 
     input:
+    tuple path(mlst_fasta), path(mlst_profile_csv) // mlst database
     tuple val(pair_id), file(reads) // ID and paired read files
     val(min_coverage) // String of minimum coverage parameter(s) for SRST2
 
@@ -13,12 +26,10 @@ process srst2_for_mlst {
     script:
     mlst_db="Streptococcus_agalactiae.fasta"
     mlst_name="Streptococcus_agalactiae"
-
     """
     set +e
 
-    getmlst.py --species 'Streptococcus agalactiae'
-    srst2 --samtools_args '\\-A' --input_pe ${reads[0]} ${reads[1]} --output ${pair_id} --save_scores --mlst_db ${mlst_db} --mlst_definitions profiles_csv --mlst_delimiter '_' --min_coverage ${min_coverage}
+    srst2 --samtools_args '\\-A' --input_pe ${reads[0]} ${reads[1]} --output ${pair_id} --save_scores --mlst_db ${mlst_fasta} --mlst_definitions ${mlst_profile_csv} --mlst_delimiter '_' --min_coverage ${min_coverage}
 
     touch ${pair_id}__mlst__${mlst_name}__results.txt
 
