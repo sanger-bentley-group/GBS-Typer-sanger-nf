@@ -288,7 +288,7 @@ workflow {
         if (params.run_sero_res){
 
             // Serotyping Process
-            serotyping(read_pairs_ch, params.serotyper_min_read_depth)
+            serotyping(read_pairs_ch, file(params.sero_gene_db, checkIfExists: true), params.serotyper_min_read_depth)
 
             // Resistance Mapping Workflows
             GBS_RES(read_pairs_ch)
