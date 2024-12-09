@@ -115,9 +115,11 @@ if (params.surfacetyper_min_read_depth < 0){
 results_dir = file(params.results_dir)
 
 if (results_dir.exists()){
-    println("This results directory already exists. Specify a new --results_dir or remove your existing one.")
-    println("Print help with nextflow main.nf --help")
-    System.exit(1)
+    if (workflow.resume !== true) {
+        println("This results directory already exists. Specify a new --results_dir or remove your existing one.")
+        println("Print help with nextflow main.nf --help")
+        System.exit(1)
+    }
 } else {
     results_dir.mkdir()
 }
